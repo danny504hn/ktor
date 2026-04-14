@@ -1,4 +1,4 @@
-package cat.montilivi.model.model
+package model
 
 import kotlinx.serialization.Serializable
 
