@@ -18,19 +18,28 @@ import kotlin.String
 
 object RepositoriLlistaDeLaCompra {
 
-    suspend fun creaLlista(_nomLlista : String, _idPropietari: Int): LlistaDeLaCompra? = dbQuery {
-        val insercio = LlistesDeLaCompra.insert{
-            it[nomLlista] = _nomLlista
-            it[propietaris] = listOf(_idPropietari)
-        }
-        insercio.resultedValues?.singleOrNull()?.toLlistaDeLaCompra()
-    }
+    suspend fun creaLlista(_nomLlista : String, _idPropietari: Int): LlistaDeLaCompra? =
+        creaLlista(_nomLlista, listOf<Int>(_idPropietari))
+
     suspend fun creaLlista(_nomLlista: String, _idsPropietaris: List<Int> ):LlistaDeLaCompra? = dbQuery {
         val insercio = LlistesDeLaCompra.insert {
             it[nomLlista] = _nomLlista
-            it[propietaris] = _idsPropietaris
         }
-        insercio.resultedValues?.singleOrNull()?.toLlistaDeLaCompra()
+
+        val id = insercio[LlistesDeLaCompra.id]
+        _idsPropietaris.forEach { propietari ->
+            LlistaPropietaris.insert {
+                it[idLlista] = id
+                it[idPropietari] = propietari
+            }
+        }
+
+        LlistaDeLaCompra(
+            idLlista = id,
+            nomLlista = _nomLlista,
+            productes = emptyList(),
+            propietaris = _idsPropietaris
+        )
     }
 
     suspend fun cercaLlistaPerId(id : Int) :LlistaDeLaCompra? = dbQuery {
@@ -59,7 +68,7 @@ object RepositoriLlistaDeLaCompra {
                 LlistaDeLaCompra(
                     idLlista = row[LlistesDeLaCompra.id],
                     nomLlista = row[LlistesDeLaCompra.nomLlista],
-                    productes = row[LlistesDeLaCompra.productes].toList(),
+                    productes = emptyList(),
                     propietaris = emptyList()
                 )
             }
@@ -77,17 +86,14 @@ object RepositoriLlistaDeLaCompra {
             .where { LlistesDeLaCompra.id eq idLlista }
             .singleOrNull()
 
-        if(llistaActual != null){
-            val propietarisLlista = llistaActual[LlistesDeLaCompra.propietaris].toMutableList()
-            if(!propietarisLlista.contains(idUsuari)){
-                propietarisLlista.add(idUsuari)
+       if(llistaActual != null){
+           LlistaPropietaris.update(where = {
+               LlistaPropietaris.idLlista eq idLlista
+           }){
+               it[idPropietari] = idUsuari
+           }
 
-                LlistesDeLaCompra.update({ LlistesDeLaCompra.id eq idLlista }) {
-                    it[propietaris] = propietarisLlista
-                } > 0
-                actualitzat = true;
-            }
-        }
+       }
         return@dbQuery actualitzat
     }
 
@@ -99,9 +105,7 @@ object RepositoriLlistaDeLaCompra {
 
         if(llista != null){
 
-            LlistesDeLaCompra.update({ LlistesDeLaCompra.id eq idLlista }) {
-                it[propietaris] = idsUsuaris
-            }
+
             LlistaPropietaris.deleteWhere { LlistaPropietaris.idLlista eq idLlista }
 
             idsUsuaris.forEach { propietari ->
@@ -119,12 +123,12 @@ object RepositoriLlistaDeLaCompra {
                                  nouNomLlista: CampActualitzable<String> = CampActualitzable.SenseCanvi,
                                  idsPropietaris: CampActualitzable<List<Int>> = CampActualitzable.SenseCanvi) = dbQuery {
         LlistesDeLaCompra.update({ LlistesDeLaCompra.id eq id }) {
-            if(idsPropietaris is CampActualitzable.NouValor){
-                it[propietaris] = idsPropietaris.valor
-            }
             if (nouNomLlista is CampActualitzable.NouValor){
                 it[nomLlista] = nouNomLlista.valor
             }
+        }
+        if(idsPropietaris is CampActualitzable.NouValor){
+            actualitzaPropietarisLlista(id, idsPropietaris.valor)
         }
 
     }
@@ -135,10 +139,17 @@ object RepositoriLlistaDeLaCompra {
         files > 0
     }
 
+    private fun obtenIdsPropietaris(idLlista: Int): List<Int> {
+        return LlistaPropietaris
+            .selectAll()
+            .where { LlistaPropietaris.idLlista eq idLlista }
+            .map { it[LlistaPropietaris.idPropietari] }
+    }
+
     private fun ResultRow.toLlistaDeLaCompra(): LlistaDeLaCompra = LlistaDeLaCompra(
         idLlista = this[LlistesDeLaCompra.id],
         nomLlista = this[LlistesDeLaCompra.nomLlista],
-        productes = this[LlistesDeLaCompra.productes],
-        propietaris = this[LlistesDeLaCompra.propietaris]
+        productes = emptyList(),
+        propietaris = emptyList()
     )
 }

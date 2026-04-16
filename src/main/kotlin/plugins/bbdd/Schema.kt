@@ -31,8 +31,8 @@ object Schema {
     object LlistesDeLaCompra: Table("LlistesDeCompra"){
         val id = integer("id").autoIncrement()
         val nomLlista = varchar("nom_llista", 50)
-        val productes = array<Int>("productes")
-        val propietaris = array<Int>("propietaris")
+//        val productes = array<Int>("productes")
+//        val propietaris = array<Int>("propietaris") NO FUNCIONA PETA
 
         override val primaryKey = PrimaryKey(id)
     }

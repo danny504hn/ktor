@@ -33,4 +33,8 @@ dependencies {
     implementation(libs.ktor.server.config.yaml)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+
+    //testing
+//    testImplementation("io.ktor:ktor-server-test-host:${ktor_version}")
+//    testImplementation("org.jetbrains.kotlin:kotlin-test:${kotlin_version}")
 }
