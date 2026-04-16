@@ -42,6 +42,7 @@ object RepositoriLlistaDeLaCompra {
             ?.toLlistaDeLaCompra()
     }
 
+    //LLISTA PROPIETARI, BUSCAS PROPIETARI, Y DEVUELVES TODAS LAS LISTAS A LAS QUE PERTENECE
     suspend fun cercaLlistesPerPropietaris(idPropietari: Int): List<Producte> = dbQuery {
        null
     }
