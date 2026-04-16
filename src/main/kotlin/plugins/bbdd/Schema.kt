@@ -46,10 +46,12 @@ object Schema {
 
     object ProductesDeLaLlista : Table("ProductesDeLaLlista"){
         val id = integer("id").autoIncrement()
+        val idLlista = integer("idLlista").references(LlistesDeLaCompra.id)
+        val idProducte = integer("idProducte").references(Productes.id)
         val quantitat = integer("quantitat")
         val unitat = varchar("unitat", 30).nullable()
         val estaComprat = bool("estaComprat")
-        val quiHaComprat = integer("quiHaComprat")
+        val quiHaComprat = integer("quiHaComprat").nullable()
 
         override val primaryKey = PrimaryKey(id)
     }
