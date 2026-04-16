@@ -1,4 +1,4 @@
-package model;
+package model
 
 sealed class CampActualitzable<out T> {
     data object SenseCanvi: CampActualitzable<Nothing>()

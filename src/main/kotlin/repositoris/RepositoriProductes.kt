@@ -1,6 +1,6 @@
 package repositoris
 
-import cat.montilivi.model.model.Producte
+import model.Producte
 import com.example.plugins.bbdd.DatabaseFactory.dbQuery
 import com.example.plugins.bbdd.Schema.Productes
 import model.CampActualitzable

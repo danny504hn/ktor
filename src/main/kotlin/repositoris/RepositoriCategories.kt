@@ -1,8 +1,9 @@
 package repositoris
 
-import Categoria
+
 import com.example.plugins.bbdd.DatabaseFactory.dbQuery
 import com.example.plugins.bbdd.Schema.Categories
+import model.Categoria
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere

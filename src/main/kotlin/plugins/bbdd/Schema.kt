@@ -28,6 +28,32 @@ object Schema {
         override val primaryKey = PrimaryKey(id)
     }
 
+    object LlistesDeLaCompra: Table("LlistesDeCompra"){
+        val id = integer("id").autoIncrement()
+        val nomLlista = varchar("nom_llista", 50)
+        val productes = array<Int>("productes")
+        val propietaris = array<Int>("propietaris")
+
+        override val primaryKey = PrimaryKey(id)
+    }
+
+    object LlistaPropietaris: Table("LlistaPropertaris"){
+        val idLlista = integer("idLlista").references(LlistesDeLaCompra.id)
+        val idPropietari = integer("idPropietaris").references(Usuaris.id)
+
+        override val primaryKey = PrimaryKey(idLlista, idPropietari)
+    }
+
+    object ProductesDeLaLlista : Table("ProductesDeLaLlista"){
+        val id = integer("id").autoIncrement()
+        val quantitat = integer("quantitat")
+        val unitat = varchar("unitat", 30).nullable()
+        val estaComprat = bool("estaComprat")
+        val quiHaComprat = integer("quiHaComprat")
+
+        override val primaryKey = PrimaryKey(id)
+    }
+
     
 
 }
