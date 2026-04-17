@@ -74,23 +74,21 @@ object DatabaseFactory {
                 val nomsCategories = listOf("Neteja", "Fruita", "Carnisseria", "Congelats", "Begudes")
 
                 nomsCategories.forEach { nomCat ->
-                    val categoriaCreada = RepositoriCategories.creaCategoria(nomCat)
-
-                    categoriaCreada?.let { cat ->
-                        val numProds = (3..8).random()
-                        for (i in 1..numProds) {
-                            RepositoriProductes.creaProducte(
-                                _nomProducte = "Producte TEST ${cat.nomCategoria} $i",
-                                _idCategoria = cat.id
-                            )
-                        }
+                    var categoriaCreada = RepositoriCategories.creaCategoria(nomCat)
+                    var i = 0;
+                    if(categoriaCreada != null){
+                        i++
+                        RepositoriProductes.creaProducte(
+                            "Producte ${categoriaCreada.nomCategoria} $i",
+                            categoriaCreada.id
+                        )
                     }
                 }
             }
-            // --- Hardcodeo de 10 Listas de la Compra ---
+
             val llistesExistents = RepositoriLlistaDeLaCompra.obtenTots()
             if (llistesExistents.isEmpty()) {
-                // Obtenemos los IDs reales de los usuarios creados (Joan, Marta, Pere, Alex, Fenrico)
+
                 val idsUsuaris = RepositoriUsuaris.obtenTots().map { it.id }
 
                 if (idsUsuaris.isNotEmpty()) {
@@ -111,7 +109,7 @@ object DatabaseFactory {
                         RepositoriLlistaDeLaCompra.creaLlista(nom, propietaris)
                     }
                 }
-                // --- Hardcodeo de 10 productos en las listas usando el Repositorio ---
+
                 val productesLlistaExistents = RepositoriProductesDeLaLlista.obtenTots()
 
                 if (productesLlistaExistents.isEmpty()) {
@@ -127,11 +125,11 @@ object DatabaseFactory {
                             val prodAzar = productesCataleg.random()
                             val compratAzar = (i % 3 == 0)
 
-                            // Usamos tu nuevo repositorio (ya no hace falta dbQuery aquí fuera)
+
                             RepositoriProductesDeLaLlista.creaProducteDeLaLlista(
                                 idLlista = llistaAzar.idLlista,
                                 idProducte = prodAzar.id,
-                                nomProducte = prodAzar.nomProducte, // El repo lo pide aunque luego haga el join
+                                nomProducte = prodAzar.nomProducte,
                                 quantitat = (1..5).random(),
                                 unitat = unitatsMostra.random(),
                                 estatComprat = compratAzar,
