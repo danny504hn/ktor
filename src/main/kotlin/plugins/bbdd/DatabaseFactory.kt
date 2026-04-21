@@ -8,6 +8,7 @@ import kotlin.collections.emptyList
 import com.example.plugins.bbdd.Schema.Usuaris
 import com.example.plugins.bbdd.Schema.Categories
 import com.example.plugins.bbdd.Schema.Productes
+import com.example.plugins.bbdd.Schema.UsuariAmics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import com.example.plugins.bbdd.Schema.LlistesDeLaCompra
@@ -34,7 +35,8 @@ object DatabaseFactory {
                 Productes,
                 LlistesDeLaCompra,
                 ProductesDeLaLlista,
-                LlistaPropietaris
+                LlistaPropietaris,
+                UsuariAmics
             )
         }
         poblaLaBBDD()
@@ -68,7 +70,17 @@ object DatabaseFactory {
                     _password = "Fenrico",
                     _alias = "Fenri"
                 )
+                RepositoriUsuaris.afegeixAmic(1,2)
+                RepositoriUsuaris.afegeixAmic(2,3)
+                RepositoriUsuaris.afegeixAmic(3,4)
+                RepositoriUsuaris.afegeixAmic(4,5)
+                RepositoriUsuaris.afegeixAmic(2,1)
+                RepositoriUsuaris.afegeixAmic(3,2)
+                RepositoriUsuaris.afegeixAmic(4,3)
+                RepositoriUsuaris.afegeixAmic(5,4)
+                RepositoriUsuaris.afegeixComAPropietariAUnaLlista(2,1)
             }
+
 
             if (RepositoriCategories.obtenTotes().isEmpty()) {
                 val nomsCategories = listOf("Neteja", "Fruita", "Carnisseria", "Congelats", "Begudes")

@@ -1,11 +1,14 @@
 package repositoris
 
 import com.example.plugins.bbdd.DatabaseFactory.dbQuery
+import com.example.plugins.bbdd.Schema
 import com.example.plugins.bbdd.Schema.Usuaris
 import model.CampActualitzable
+import model.LlistaPropietaris
 import model.Usuari
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
@@ -76,6 +79,41 @@ object RepositoriUsuaris {
         Usuaris.update(where = { Usuaris.id eq _id }){
             it[Usuaris.password] = _password
         }
+    }
+    suspend fun afegeixAmic(_idUsuari :Int, _idAmic : Int) : Boolean = dbQuery{
+        val insercio = Schema.UsuariAmics.insert {
+            it[idUsuari] = _idUsuari
+            it[idAmic] = _idAmic
+        }
+        val filesAfectades = insercio.resultedValues?.count()?:0
+        filesAfectades > 0
+    }
+
+    suspend fun obtenAmics(idUsuari : Int) : List<Usuari> = dbQuery{
+        (Usuaris innerJoin Schema.UsuariAmics)
+            .selectAll()
+            .where{Usuaris.id eq idUsuari}
+            .map { row ->
+                row.toUsuari()
+            }
+
+    }
+
+    suspend fun afegeixComAPropietariAUnaLlista(idUsuari: Int, _idLlista: Int) : Boolean = dbQuery {
+        val insercio = Schema.LlistaPropietaris.insert {
+            it[idLlista] = _idLlista
+            it[idPropietari] = idUsuari
+        }
+        val filesAfectades = insercio.resultedValues?.count() ?:0
+        filesAfectades > 0
+    }
+
+    suspend fun eliminaComAPropietariAUnaLlista(idUsuari : Int, idLlista : Int) : Boolean = dbQuery {
+    val esborrat = Schema.LlistaPropietaris.deleteWhere {
+        (Schema.LlistaPropietaris.idPropietari eq idPropietari)  and (Schema.LlistaPropietaris.idLlista eq idLlista)
+    }
+    esborrat > 0
+
     }
 
     private fun ResultRow.toUsuari(): Usuari = Usuari(id = this[Usuaris.id],

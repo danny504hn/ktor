@@ -1,5 +1,6 @@
 package com.example.plugins.bbdd
 
+import com.example.plugins.bbdd.Schema.ProductesDeLaLlista.id
 import org.jetbrains.exposed.sql.Table
 
 object Schema {
@@ -54,6 +55,11 @@ object Schema {
         val quiHaComprat = integer("quiHaComprat").nullable()
 
         override val primaryKey = PrimaryKey(id)
+    }
+    object  UsuariAmics : Table("UsuariAmics"){
+        val idUsuari = integer("id").references(Usuaris.id)
+        val idAmic = integer("idAmic").references(Usuaris.id)
+        override val primaryKey = PrimaryKey(idUsuari,idAmic)
     }
 
     

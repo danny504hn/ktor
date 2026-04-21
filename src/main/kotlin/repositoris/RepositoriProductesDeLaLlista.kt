@@ -136,7 +136,7 @@ object RepositoriProductesDeLaLlista {
             }
         }
 
-        // Actualitzem la resta a ProductesDeLaLlista
+
         val files = ProductesDeLaLlista.update({
             (ProductesDeLaLlista.idLlista eq idLlista) and
                     (ProductesDeLaLlista.idProducte eq idProducte)
