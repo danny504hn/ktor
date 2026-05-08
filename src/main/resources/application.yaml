@@ -4,3 +4,9 @@ ktor:
             - com.example.ApplicationKt.module
     deployment:
         port: 8084
+
+jwt:
+  secret: "secret"
+  issuer: "http://127.0.0.1:8084/"
+  audience: "http://127.0.0.1:8084/user"
+  realm : "Access to 'hello'"

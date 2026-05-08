@@ -1,5 +1,6 @@
 val exposed_version: String by project
 val sqlite_jdbc_version: String by project
+val ktor_version: String by project
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
@@ -18,6 +19,9 @@ kotlin {
 }
 
 dependencies {
+    implementation("io.ktor:ktor-server-websockets:3.4.1")
+    implementation("io.ktor:ktor-server-auth:${ktor_version}")
+    implementation("io.ktor:ktor-server-auth-jwt:${ktor_version}")
     // exposed
     implementation("org.jetbrains.exposed:exposed-core:${exposed_version}")
     implementation("org.jetbrains.exposed:exposed-jdbc:${exposed_version}")
@@ -28,6 +32,7 @@ dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation("io.ktor:ktor-server-html-builder")
+
     implementation(libs.ktor.server.cio)
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.config.yaml)

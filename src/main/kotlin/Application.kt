@@ -3,6 +3,7 @@ package com.example
 import com.example.plugins.bbdd.DatabaseFactory
 import com.example.plugins.configureRouting
 import com.example.plugins.configureSerialization
+import com.example.plugins.security.configureSockets
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
@@ -13,6 +14,7 @@ fun Application.module() {
     DatabaseFactory.init()
     configureSerialization()
     configureRouting()
+    configureSockets()
 }
 
 

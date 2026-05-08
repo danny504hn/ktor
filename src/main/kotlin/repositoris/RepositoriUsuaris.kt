@@ -63,7 +63,7 @@ object RepositoriUsuaris {
         _nom:CampActualitzable<String>,
         _password: CampActualitzable<String>,
         _alias: CampActualitzable<String>
-    ) = dbQuery {
+    ): Boolean = dbQuery {
         Usuaris.update(where = {Usuaris.id eq _id}){
             if (_nom is CampActualitzable.NouValor)
                 it[Usuaris.nomUsuari] = _nom.valor
@@ -71,7 +71,7 @@ object RepositoriUsuaris {
                 it[Usuaris.password] = _password.valor
             if (_alias is CampActualitzable.NouValor)
                 it[Usuaris.alias] = _alias.valor
-        }
+        } >0
     }
 
 
