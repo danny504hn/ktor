@@ -7,6 +7,6 @@ ktor:
 
 jwt:
   secret: "secret"
-  issuer: "http://127.0.0.1:8084/"
-  audience: "http://127.0.0.1:8084/user"
-  realm : "Access to 'hello'"
+  issuer: "http://127.0.0.1:8084"
+  audience: "http://127.0.0.1:8084"
+  realm: "Access to 'hello'"

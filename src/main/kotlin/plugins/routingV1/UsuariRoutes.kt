@@ -31,125 +31,142 @@ fun Route.rutesUsuaris() {
     val issuer = config.property("jwt.issuer").getString()
     val audience = config.property("jwt.audience").getString()
     //AQUI VA EL LOGIN
-    authenticate("auth-jwt") {
-        post("login"){
-            val user = call.receive<Usuari>()
-            if(RepositoriUsuaris.cercaUsuariPerID(user.id) !=null){
-                val token = JWT.create()
-                    .withAudience(audience)
-                    .withIssuer(issuer)
-                    .withClaim("username", user.nomUsuari)
-                    .withExpiresAt(Date(System.currentTimeMillis() + 60000))
-                    .sign(Algorithm.HMAC256(secret))
-                call.respond(hashMapOf("token" to token))
-            }else{
-                call.respond(status = HttpStatusCode.NotFound,"No existeix l'usuari")
-            }
+    post("login") {
+        val user = call.receive<Usuari>()
+        val usuariTrobat = RepositoriUsuaris.obtenTots()
+            .find { it.nomUsuari == user.nomUsuari && it.password == user.password }
+
+        if (usuariTrobat != null) {
+            val token = JWT.create()
+                .withAudience(audience)
+                .withIssuer(issuer)
+                .withClaim("idUsuari", usuariTrobat.id)  // <- pon idUsuari, no username
+                .withExpiresAt(Date(System.currentTimeMillis() + 604800000))
+                .sign(Algorithm.HMAC256(secret))
+            call.respond(hashMapOf("token" to token))
+        } else {
+            call.respond(status = HttpStatusCode.NotFound, "No existeix l'usuari")
         }
     }
 
-    get("usuaris"){
-        call.respond(RepositoriUsuaris.obtenTots())
-    }
 
-    post("registre"){
-        val parametres = call.receive<PeticioRegistreUsuari>()
+        get("usuaris") {
+            println("en endpoint usuaris")
+            call.respond(RepositoriUsuaris.obtenTots())
 
-        RepositoriUsuaris.creaUsuari(
-            parametres.nomUsuari,
-            parametres.password,
-            parametres.alias
-        )?.let{
-            call.respond(status = HttpStatusCode.Created,message = mapOf(
-                "username" to it.nomUsuari,
-                "alias" to it.alias
-            ))
-        } ?: call.respond(status = HttpStatusCode.BadRequest, message = "No s'ha pogut crear l'usuari")
-    }
-
-authenticate("auth-jwt"){
-    route("me"){
-        get{
-            val idUsuari = call.principal<JWTPrincipal>()
-                ?.payload?.getClaim("idUsuari")?.asInt()
-                ?: return@get call.respond(status = HttpStatusCode.Unauthorized, message = "unauthorized")
-
-            val usuari = RepositoriUsuaris.cercaUsuariPerID(idUsuari)
-            if(usuari != null){
-                call.respond(usuari)
-            }else{
-                call.respond(HttpStatusCode.NotFound)
-            }
         }
-        delete{
-            val idUsuari = call.principal<JWTPrincipal>()
-                ?.payload?.getClaim("idUsuari")?.asInt()
-                ?: return@delete call.respond(status = HttpStatusCode.Unauthorized, message = "unauthorized")
 
-            val usuari = RepositoriUsuaris.eliminarUsuari(idUsuari)
-            if(usuari){
-                call.respond(status = HttpStatusCode.OK,"Usuari eliminat correctament")
-            }else{
-                call.respond(HttpStatusCode.NotFound,"usuari no trobat")
-            }
-        }
-        patch {
-            val idUsuari = call.principal<JWTPrincipal>()
-                ?.payload?.getClaim("idUsuari")?.asInt()
-                ?: return@patch call.respond(status = HttpStatusCode.Unauthorized, message = "unauthorized")
+        post("registre") {
+            val parametres = call.receive<PeticioRegistreUsuari>()
 
-            val parametres = call.receive<PeticioActualitzacioUsuari>()
-
-           val exit = RepositoriUsuaris.actualitzaUsuari(
-                idUsuari,
-                _nom = parametres.nomUsuari.toCampActualitzable(),
-                _password = parametres.motDePas.toCampActualitzable(),
-                _alias = parametres.alias.toCampActualitzable(),
-               )
-            if(exit){
-                call.respond(status = HttpStatusCode.OK,"Usuari eliminat correctament")
-            }else{
-                call.respond(HttpStatusCode.NotFound,"usuari no trobat")
-            }
-        }
-    }
-
-    route("me/amics"){
-        get{
-            val idUsuari = call.principal<JWTPrincipal>()
-                ?.payload?.getClaim("idUsuari")?.asInt()
-                ?: return@get call.respond(status = HttpStatusCode.Unauthorized, message = "unauthorized")
-
-            val amics = RepositoriUsuaris.obtenAmics(idUsuari)
-            call.respond(amics)
-        }
-        post("idAmic"){
-            val idUsuari = call.principal<JWTPrincipal>()
-                ?.payload?.getClaim("idUsuari")?.asInt()
-                ?: return@post call.respond(status = HttpStatusCode.Unauthorized, message = "unauthorized")
-            val idAmic = call.parameters["idAmic"]?.toIntOrNull()
-                ?: return@post call.respond(status = HttpStatusCode.BadRequest, message = "el id amic no es valid")
-            val exit = RepositoriUsuaris.afegeixAmic(idUsuari,idAmic)
-            if(exit){
-                call.respond(status = HttpStatusCode.OK,"bien")
-                val llistaIdsPerNotificar = listOf(idAmic)
-                GestorDeConnexions.enviaAUsuarisConcrects(
-                    llistaIdsPerNotificar,
-                    esdevenimet = EsdevenimentLlista(
-                        accio = TipusAccio.NOTIFICACIO_AMISTAT_NOVA,
-                        idLlista = null,
-                        idRecursAfectat = idUsuari,
-                        producte = null)
+            RepositoriUsuaris.creaUsuari(
+                parametres.nomUsuari,
+                parametres.password,
+                parametres.alias
+            )?.let {
+                call.respond(
+                    status = HttpStatusCode.Created, message = mapOf(
+                        "username" to it.nomUsuari,
+                        "alias" to it.alias
+                    )
                 )
-            }else{
-                call.respond(status = HttpStatusCode.BadRequest,"mal")
+            } ?: call.respond(status = HttpStatusCode.BadRequest, message = "No s'ha pogut crear l'usuari")
+        }
+
+        authenticate("auth-jwt") {
+            route("me") {
+                get {
+                    val idUsuari = call.principal<JWTPrincipal>()
+                        ?.payload?.getClaim("idUsuari")?.asInt()
+                        ?: return@get call.respond(status = HttpStatusCode.Unauthorized, message = "unauthorized")
+
+                    val usuari = RepositoriUsuaris.cercaUsuariPerID(idUsuari)
+                    if (usuari != null) {
+                        call.respond(usuari)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+                delete {
+                    val idUsuari = call.principal<JWTPrincipal>()
+                        ?.payload?.getClaim("idUsuari")?.asInt()
+                        ?: return@delete call.respond(status = HttpStatusCode.Unauthorized, message = "unauthorized")
+
+                    val usuari = RepositoriUsuaris.eliminarUsuari(idUsuari)
+                    if (usuari) {
+                        call.respond(status = HttpStatusCode.OK, "Usuari eliminat correctament")
+                    } else {
+                        call.respond(HttpStatusCode.NotFound, "usuari no trobat")
+                    }
+                }
+                patch {
+                    val idUsuari = call.principal<JWTPrincipal>()
+                        ?.payload?.getClaim("idUsuari")?.asInt()
+                        ?: return@patch call.respond(status = HttpStatusCode.Unauthorized, message = "unauthorized")
+
+                    val parametres = call.receive<PeticioActualitzacioUsuari>()
+
+                    val exit = RepositoriUsuaris.actualitzaUsuari(
+                        idUsuari,
+                        _nom = parametres.nomUsuari.toCampActualitzable(),
+                        _password = parametres.motDePas.toCampActualitzable(),
+                        _alias = parametres.alias.toCampActualitzable(),
+                    )
+                    if (exit) {
+                        call.respond(status = HttpStatusCode.OK, "Usuari actualitzat correctament")
+                    } else {
+                        call.respond(HttpStatusCode.NotFound, "usuari no trobat")
+                    }
+                }
+            }
+
+            route("me/amics") {
+                get {
+                    val idUsuari = call.principal<JWTPrincipal>()
+                        ?.payload?.getClaim("idUsuari")?.asInt()
+                        ?: return@get call.respond(status = HttpStatusCode.Unauthorized, message = "unauthorized")
+
+                    val amics = RepositoriUsuaris.obtenAmics(idUsuari)
+                    call.respond(amics)
+                }
+                route("{idAmic}") {
+                    post {
+                        val idUsuari = call.principal<JWTPrincipal>()
+                            ?.payload?.getClaim("idUsuari")?.asInt()
+                            ?: return@post call.respond(status = HttpStatusCode.Unauthorized, message = "unauthorized")
+                        val idAmic = call.parameters["idAmic"]?.toIntOrNull()
+                            ?: return@post call.respond(status = HttpStatusCode.BadRequest, message = "el id amic no es valid")
+                        val exit = RepositoriUsuaris.afegeixAmic(idUsuari, idAmic)
+                        if (exit) {
+                            call.respond(status = HttpStatusCode.OK, "Amic afegit")
+                            GestorDeConnexions.enviaAUsuarisConcrects(
+                                listOf(idAmic),
+                                esdevenimet = EsdevenimentLlista(
+                                    accio = TipusAccio.NOTIFICACIO_AMISTAT_NOVA,
+                                    idLlista = null,
+                                    idRecursAfectat = idUsuari,
+                                    producte = null
+                                )
+                            )
+                        } else {
+                            call.respond(status = HttpStatusCode.BadRequest, "mal")
+                        }
+                    }
+                    /*delete {
+                        val idUsuari = call.principal<JWTPrincipal>()
+                            ?.payload?.getClaim("idUsuari")?.asInt()
+                            ?: return@delete call.respond(status = HttpStatusCode.Unauthorized, message = "unauthorized")
+                        val idAmic = call.parameters["idAmic"]?.toIntOrNull()
+                            ?: return@delete call.respond(status = HttpStatusCode.BadRequest, message = "el id amic no es valid")
+                       // val exit = RepositoriUsuaris.eliminaAmic(idUsuari, idAmic)
+                        if (exit) {
+                            call.respond(status = HttpStatusCode.OK, "Amic eliminat")
+                        } else {
+                            call.respond(status = HttpStatusCode.NotFound, "Amic no trobat")
+                        }
+                    }*/
+                }
             }
         }
-        delete("idAmic"){
-
-        }
-
     }
-    }
-}
 

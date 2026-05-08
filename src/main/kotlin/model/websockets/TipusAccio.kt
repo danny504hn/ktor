@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable;
 @Serializable
 enum class TipusAccio {
     CONNEXIO_ESTABLERTA,
-    PRODUCTe_AFEGIT,
+    PRODUCTE_AFEGIT,
     PRODUCTE_ACTUALITZAT,
     PRODUCTE_ELIMINAT,
     LLISTA_ACTUALITZADA,

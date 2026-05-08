@@ -89,14 +89,15 @@ object RepositoriUsuaris {
         filesAfectades > 0
     }
 
-    suspend fun obtenAmics(idUsuari : Int) : List<Usuari> = dbQuery{
-        (Usuaris innerJoin Schema.UsuariAmics)
+    suspend fun obtenAmics(idUsuari: Int): List<Usuari> = dbQuery {
+        val idsAmics = Schema.UsuariAmics
             .selectAll()
-            .where{Usuaris.id eq idUsuari}
-            .map { row ->
-                row.toUsuari()
-            }
+            .where { Schema.UsuariAmics.idUsuari eq idUsuari }
+            .map { it[Schema.UsuariAmics.idAmic] }
 
+        Usuaris.selectAll()
+            .where { Usuaris.id inList idsAmics }
+            .map { it.toUsuari() }
     }
 
     suspend fun afegeixComAPropietariAUnaLlista(idUsuari: Int, _idLlista: Int) : Boolean = dbQuery {
@@ -114,6 +115,11 @@ object RepositoriUsuaris {
     }
     esborrat > 0
 
+    }
+    suspend fun eliminaAmic(idUsuari: Int, idAmic: Int): Boolean = dbQuery {
+        Schema.UsuariAmics.deleteWhere {
+            (Schema.UsuariAmics.idUsuari eq idUsuari) and (Schema.UsuariAmics.idAmic eq idAmic)
+        } > 0
     }
 
     private fun ResultRow.toUsuari(): Usuari = Usuari(id = this[Usuaris.id],

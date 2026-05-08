@@ -57,7 +57,7 @@ object Schema {
         override val primaryKey = PrimaryKey(id)
     }
     object  UsuariAmics : Table("UsuariAmics"){
-        val idUsuari = integer("id").references(Usuaris.id)
+        val idUsuari = integer("idUsuari").references(Usuaris.id)
         val idAmic = integer("idAmic").references(Usuaris.id)
         override val primaryKey = PrimaryKey(idUsuari,idAmic)
     }
