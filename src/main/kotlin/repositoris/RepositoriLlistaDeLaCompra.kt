@@ -150,6 +150,6 @@ object RepositoriLlistaDeLaCompra {
         idLlista = this[LlistesDeLaCompra.id],
         nomLlista = this[LlistesDeLaCompra.nomLlista],
         productes = emptyList(),
-        propietaris = emptyList()
+        propietaris = obtenIdsPropietaris(this[LlistesDeLaCompra.id])
     )
 }

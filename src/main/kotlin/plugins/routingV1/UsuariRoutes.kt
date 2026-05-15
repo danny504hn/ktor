@@ -152,19 +152,28 @@ fun Route.rutesUsuaris() {
                             call.respond(status = HttpStatusCode.BadRequest, "mal")
                         }
                     }
-                    /*delete {
+                    delete {
                         val idUsuari = call.principal<JWTPrincipal>()
                             ?.payload?.getClaim("idUsuari")?.asInt()
                             ?: return@delete call.respond(status = HttpStatusCode.Unauthorized, message = "unauthorized")
                         val idAmic = call.parameters["idAmic"]?.toIntOrNull()
                             ?: return@delete call.respond(status = HttpStatusCode.BadRequest, message = "el id amic no es valid")
-                       // val exit = RepositoriUsuaris.eliminaAmic(idUsuari, idAmic)
+                        val exit = RepositoriUsuaris.eliminaAmic(idUsuari, idAmic)
                         if (exit) {
                             call.respond(status = HttpStatusCode.OK, "Amic eliminat")
+                            GestorDeConnexions.enviaAUsuarisConcrects(
+                                idsUsuaris = listOf(idAmic),
+                                esdevenimet = EsdevenimentLlista(
+                                    accio = TipusAccio.NOTIFICACIO_AMISTAT_ELIMINADA,
+                                    idLlista = null,
+                                    idRecursAfectat = idUsuari,
+                                    producte = null
+                                )
+                            )
                         } else {
                             call.respond(status = HttpStatusCode.NotFound, "Amic no trobat")
                         }
-                    }*/
+                    }
                 }
             }
         }

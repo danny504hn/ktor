@@ -1,5 +1,6 @@
 package com.example.plugins.routingV1
 import com.example.model.request.PeticioProducte
+import com.example.repositoris.RepositoriLlistaDeLaCompra
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
@@ -15,6 +16,12 @@ import repositoris.RepositoriProductes
 
 fun Route.rutesProductes() {
     authenticate("auth-jwt") {
+
+        suspend fun obtenPropietarisANotificar(idLlista: Int, idUsuari: Int): List<Int> {
+            val llista = RepositoriLlistaDeLaCompra.cercaLlistaPerId(idLlista)
+            return llista?.propietaris?.filter { it != idUsuari } ?: emptyList()
+        }
+
         route("productes") {
             get {
                 val idCategoria = call.request.queryParameters["idCategoria"]?.toIntOrNull()
@@ -55,6 +62,7 @@ fun Route.rutesProductes() {
                 val idProducte = call.parameters["idProducte"]?.toIntOrNull()
                     ?: return@delete call.respond(status = HttpStatusCode.BadRequest, message = "Id no valid")
                 val exit = RepositoriProductes.eliminaProducte(idProducte)
+
                 if (exit) {
                     call.respond(status = HttpStatusCode.OK, message = "Producte eliminat")
                 } else {

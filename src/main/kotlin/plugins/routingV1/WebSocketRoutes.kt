@@ -31,7 +31,7 @@ fun Route.rutesDelSocket(){
                 }
             }
         }finally {
-            GestorDeConnexions.elimina(1)
+            GestorDeConnexions.elimina(idUsuari)
         }
     } }
 
