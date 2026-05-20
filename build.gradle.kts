@@ -36,6 +36,8 @@ dependencies {
     implementation(libs.ktor.server.cio)
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.config.yaml)
+    implementation("io.ktor:ktor-server-swagger:3.4.1")
+    implementation("io.ktor:ktor-server-routing-openapi:3.4.1")
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
 

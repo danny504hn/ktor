@@ -8,6 +8,7 @@ import com.example.plugins.security.configureSockets
 import io.ktor.server.application.*
 import repositoris.RepositoriUsuaris
 
+
 fun main(args: Array<String>) {
     io.ktor.server.cio.EngineMain.main(args)
 }
@@ -17,7 +18,6 @@ fun Application.module() {
     configureSerialization()
     configureSecurity(RepositoriUsuaris)
     configureSockets()
-
     configureRouting()
 }
 

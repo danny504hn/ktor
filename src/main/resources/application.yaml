@@ -10,3 +10,4 @@ jwt:
   issuer: "http://127.0.0.1:8084"
   audience: "http://127.0.0.1:8084"
   realm: "Access to 'hello'"
+
